@@ -491,6 +491,10 @@ void AP_Periph_FW::update()
 #ifdef HAL_PERIPH_ENABLE_BATTERY_BALANCE
     batt_balance_update();
 #endif
+
+#ifdef HAL_PERIPH_ENABLE_HEATED_BATTERY
+    heated_battery_update();
+#endif
     
     static uint32_t fiftyhz_last_update_ms;
     if (now - fiftyhz_last_update_ms >= 20) {

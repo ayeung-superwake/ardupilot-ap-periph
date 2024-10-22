@@ -39,6 +39,7 @@
 #include <AP_RCProtocol/AP_RCProtocol_config.h>
 #include "rc_in.h"
 #include "batt_balance.h"
+#include "heated_battery.h"
 #include "networking.h"
 #include "serial_options.h"
 #if AP_SIM_ENABLED
@@ -373,6 +374,12 @@ public:
 #ifdef HAL_PERIPH_ENABLE_BATTERY_BALANCE
     void batt_balance_update();
     BattBalance battery_balance;
+#endif
+
+#ifdef HAL_PERIPH_ENABLE_HEATED_BATTERY
+    void heated_battery_update();
+    void can_send_battery(uint8_t id, AP_HAL::AnalogSource **values, uint8_t nvalues);
+    HeatedBattery heated_battery;
 #endif
 
 #ifdef HAL_PERIPH_ENABLE_SERIAL_OPTIONS

@@ -643,6 +643,12 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GOBJECT(battery_balance, "BAL",  BattBalance),
 #endif
 
+#ifdef HAL_PERIPH_ENABLE_HEATED_BATTERY
+    // @Group: HBAT
+    // @Path: heated_battery.cpp
+    GOBJECT(heated_battery, "HBAT",  HeatedBattery),
+#endif
+
 #ifdef HAL_PERIPH_ENABLE_SERIAL_OPTIONS
     // @Group: UART
     // @Path: serial_options.cpp
