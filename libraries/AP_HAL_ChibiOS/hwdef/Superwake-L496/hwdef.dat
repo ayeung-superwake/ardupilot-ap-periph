@@ -1,0 +1,104 @@
+# hw definition file for processing by chibios_pins.py
+
+# MCU class and specific type
+MCU STM32L496 STM32L496xx
+
+# bootloader starts firmware at 36k + 4k (STORAGE_FLASH)
+FLASH_RESERVE_START_KB 40
+
+# store parameters in pages 18 and 19
+STORAGE_FLASH_PAGE 18
+define HAL_STORAGE_SIZE 800
+
+# board ID for firmware load
+APJ_BOARD_ID 1888
+
+# setup build for a peripheral firmware
+env AP_PERIPH 1
+
+# enable watchdog
+
+# crystal frequency
+OSCILLATOR_HZ 12000000
+
+# assume the 256k flash part
+FLASH_SIZE_KB 256
+
+# order of UARTs
+SERIAL_ORDER USART1
+
+define HAL_CAN_POOL_SIZE 6000
+
+#STDOUT_SERIAL SD1
+#STDOUT_BAUDRATE 57600
+
+# USART1
+PB6 USART1_TX USART1 SPEED_HIGH NODMA
+PB7 USART1_RX USART1 SPEED_HIGH NODMA
+
+# I2C2 bus
+PB11 I2C2_SDA I2C2
+PB10 I2C2_SCL I2C2
+
+I2C_ORDER I2C2
+
+# allow for reboot command for faster development
+define HAL_PERIPH_LISTEN_FOR_SERIAL_UART_REBOOT_CMD_PORT 0
+
+# debugger support (disabled as conflicts with LED)
+PA13 JTMS-SWDIO SWD
+PA14 JTCK-SWCLK SWD
+
+define HAL_NO_GPIO_IRQ
+define SERIAL_BUFFERS_SIZE 512
+
+define DMA_RESERVE_SIZE 2048
+
+# stack for fast interrupts
+define PORT_INT_REQUIRED_STACK 64
+
+# MAIN_STACK is stack for ISR handlers
+MAIN_STACK 0x300
+
+# PROCESS_STACK controls stack for main thread
+PROCESS_STACK 0xA00
+
+# enable CAN support
+# must define CAN1 for CAN2 to work? PB8 PB9
+PB8 CAN1_RX CAN1
+PB9 CAN1_TX CAN1
+
+PB12 CAN2_RX CAN2
+PB13 CAN2_TX CAN2
+
+# ADC inputs
+define HAL_USE_ADC TRUE
+define STM32_ADC_USE_ADC1 TRUE
+
+PA4 CELL1 ADC1 SCALE(1) ANALOG(0)
+PA3 CELL2 ADC1 SCALE(1) ANALOG(1)
+PA2 CELL3 ADC1 SCALE(1) ANALOG(2)
+
+PA5 TEMP1 ADC1 SCALE(1) ANALOG(3)
+PA6 TEMP2 ADC1 SCALE(1) ANALOG(4)
+PA7 TEMP3 ADC1 SCALE(1) ANALOG(5)
+
+PC4 HEATER OUTPUT LOW GPIO(80)
+
+
+# External watchdog gpio
+PA11 EXT_WDOG OUTPUT SPEED_VERYLOW
+define EXT_WDOG_INTERVAL_MS 50
+
+define AP_STATS_ENABLED 1
+
+define HAL_NO_GCS
+
+define AP_PARAM_MAX_EMBEDDED_PARAM 512
+
+define HAL_PERIPH_ENABLE_BATTERY 1
+define HAL_PERIPH_ENABLE_HEATED_BATTERY 1
+define AP_PERIPH_BATTERY_BALANCE_NUMCELLS_DEFAULT 3
+define AP_PERIPH_BATTERY_BALANCE_RATE_DEFAULT 2
+define AP_PERIPH_BATTERY_BALANCE_CELL1_PIN_DEFAULT 0
+define AP_PERIPH_BATTERY_BALANCE_ID_DEFAULT 0

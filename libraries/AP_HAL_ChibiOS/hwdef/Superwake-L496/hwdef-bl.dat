@@ -1,0 +1,76 @@
+# hw definition file for processing by chibios_pins.py
+
+# MCU class and specific type
+MCU STM32L496 STM32L496xx
+
+FLASH_RESERVE_START_KB 0
+FLASH_BOOTLOADER_LOAD_KB 36
+
+# reserve some space for params
+APP_START_OFFSET_KB 4
+
+# board ID for firmware load
+APJ_BOARD_ID 1888
+
+# setup build for a peripheral firmware
+env AP_PERIPH 1
+
+# crystal frequency
+OSCILLATOR_HZ 12000000
+
+# assume 256k flash part
+FLASH_SIZE_KB 256
+
+STDOUT_SERIAL SD1
+STDOUT_BAUDRATE 57600
+
+# order of UARTs
+SERIAL_ORDER USART1
+
+# a fault LED
+PA9 LED_BOOTLOADER OUTPUT HIGH # red
+PA10 LED_ACTIVITY OUTPUT HIGH # yellow
+define HAL_LED_ON 0
+
+# I2C2 bus
+PB11 I2C2_SDA I2C2
+PB10 I2C2_SCL I2C2
+
+# USART1
+PB6 USART1_TX USART1 SPEED_HIGH NODMA
+PB7 USART1_RX USART1 SPEED_HIGH NODMA
+
+define HAL_USE_SERIAL TRUE
+
+define STM32_SERIAL_USE_USART1 TRUE
+
+define HAL_NO_GPIO_IRQ
+
+define SERIAL_BUFFERS_SIZE 32
+define HAL_USE_EMPTY_IO TRUE
+define PORT_INT_REQUIRED_STACK 64
+
+define DMA_RESERVE_SIZE 0
+
+MAIN_STACK 0x800
+PROCESS_STACK 0x800
+
+# enable CAN support
+# must define CAN1 for CAN2 to work? PB8 PB9  xPD0 xPD1
+PB8 CAN1_RX CAN1
+PB9 CAN1_TX CAN1
+
+PB12 CAN2_RX CAN2
+PB13 CAN2_TX CAN2
+
+# debugger support, disabled as PA13 used for LED
+PA13 JTMS-SWDIO SWD
+PA14 JTCK-SWCLK SWD
+
+# make bl baudrate match debug baudrate for easier debugging
+define BOOTLOADER_BAUDRATE 57600
+
+# use a small bootloader timeout
+define HAL_BOOTLOADER_TIMEOUT 1000
+
+define CAN_APP_NODE_NAME "superwake-L496-bl"
