@@ -28,11 +28,11 @@ extern const AP_HAL::HAL &hal;
 
 
 const AP_Param::GroupInfo HeatedBattery::var_info[] {
-    // @Param: _NUM_CELLS
-    // @DisplayName: Number of battery cells
-    // @Description: Number of battery cells to monitor
-    // @Range: 0 64
-    AP_GROUPINFO("_NUM_CELLS", 1, HeatedBattery, num_cells, AP_PERIPH_BATTERY_BALANCE_NUMCELLS_DEFAULT),
+    // @Param: _ID
+    // @DisplayName: Battery ID
+    // @Description: Battery ID to match against other batteries
+    // @Range: 0 127
+    AP_GROUPINFO("_ENABLE", 1, HeatedBattery, enable, 0),
 
     // @Param: _ID
     // @DisplayName: Battery ID
@@ -46,12 +46,6 @@ const AP_Param::GroupInfo HeatedBattery::var_info[] {
     // @Range: 0 20
     AP_GROUPINFO("_RATE", 3, HeatedBattery, rate, AP_PERIPH_BATTERY_BALANCE_RATE_DEFAULT),
 
-    // @Param: _CELL1_PIN
-    // @DisplayName: First analog pin
-    // @Description: Analog pin of the first cell. Later cells must be sequential
-    // @Range: 0 127
-    AP_GROUPINFO("_CELL1_PIN", 4, HeatedBattery, cell1_pin, AP_PERIPH_BATTERY_BALANCE_CELL1_PIN_DEFAULT),
-        
     AP_GROUPEND
 };
 
@@ -59,6 +53,18 @@ HeatedBattery::HeatedBattery(void)
 {
     AP_Param::setup_object_defaults(this, var_info);
     heater_power = 0;
+}
+
+void HeatedBattery::heater_on(AP_HAL::GPIO* gpio)
+{
+    gpio->pinMode(80, HAL_GPIO_OUTPUT);
+    gpio->write(80, 1);
+}
+
+void HeatedBattery::heater_off(AP_HAL::GPIO* gpio)
+{
+    gpio->pinMode(80, HAL_GPIO_OUTPUT);
+    gpio->write(80, 0);
 }
 
 void AP_Periph_FW::heated_battery_update()
@@ -71,20 +77,20 @@ void AP_Periph_FW::heated_battery_update()
     // TODO: Status bits 
     // TODO: EEPROM access
 
-    const int8_t ncell = heated_battery.num_cells;
+    const int8_t ncell = 16;
     if (ncell <= 0) {
         return;
     }
 
-    // allocate cell sources if needed
-    if (heated_battery.cells == nullptr) {
-        heated_battery.cells = NEW_NOTHROW AP_HAL::AnalogSource*[ncell];
-        if (heated_battery.cells == nullptr) {
+    // allocate adc channels
+    if (heated_battery.adc == nullptr) {
+        heated_battery.adc = NEW_NOTHROW AP_HAL::AnalogSource*[ncell];
+        if (heated_battery.adc == nullptr) {
             return;
         }
-        heated_battery.cells_allocated = ncell;
-        for (uint8_t i=0; i<heated_battery.cells_allocated; i++) {
-            heated_battery.cells[i] = hal.analogin->channel(heated_battery.cell1_pin + i);
+        heated_battery.adc_allocated = ncell;
+        for (uint8_t i=0; i<heated_battery.adc_allocated; i++) {
+            heated_battery.adc[i] = hal.analogin->channel(i);
         }
     }
 
@@ -95,24 +101,37 @@ void AP_Periph_FW::heated_battery_update()
     }
     heated_battery.last_send_ms = now;
 
-    can_send_battery(uint8_t(heated_battery.id), heated_battery.cells, ncell);
-
+    can_send_battery(uint8_t(heated_battery.id), heated_battery.adc, ncell);
 
     if (heated_battery.heater_power > 9) {
         // Turn on heater
-        hal.gpio->pinMode(80, HAL_GPIO_OUTPUT);
-        hal.gpio->write(80, 1);
-        can_printf("Heated battery: On");
+        if (heated_battery.enable)
+        {
+            heated_battery.heater_on(hal.gpio);
+            can_printf("Heated battery: On");
+        }
+        else
+        {
+            heated_battery.heater_off(hal.gpio);
+            can_printf("Heated battery: Off");
+        }
         if (heated_battery.heater_power > 12) {
             heated_battery.heater_power = 0;
         }
     } else {
         // Turn off heater
-        hal.gpio->pinMode(80, HAL_GPIO_OUTPUT);
-        hal.gpio->write(80, 0);
+        heated_battery.heater_off(hal.gpio);
         can_printf("Heated battery: Off");
     }
     heated_battery.heater_power ++;
+
+    for (uint8_t i = 3; i < 6; i++) {
+        if (heated_battery.adc[i] != nullptr) {
+            float voltage = heated_battery.adc[i]->voltage_average();
+            float temperature = -96.1f + 66.5f * voltage + 4.38f * voltage * voltage;
+            can_printf("Channel %d Voltage: %f Temperature: %f", i, voltage, temperature);
+        }
+    }
 
 }
 
