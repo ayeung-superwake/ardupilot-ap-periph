@@ -32,7 +32,7 @@ const AP_Param::GroupInfo HeatedBattery::var_info[] {
     // @DisplayName: Battery ID
     // @Description: Battery ID to match against other batteries
     // @Range: 0 127
-    AP_GROUPINFO("_ENABLE", 1, HeatedBattery, enable, 0),
+    AP_GROUPINFO("_ENABLE", 1, HeatedBattery, enable, 1),
 
     // @Param: _ID
     // @DisplayName: Battery ID

@@ -73,4 +73,8 @@ define BOOTLOADER_BAUDRATE 57600
 # use a small bootloader timeout
 define HAL_BOOTLOADER_TIMEOUT 1000
 
+# External watchdog gpio
+PA11 EXT_WDOG OUTPUT SPEED_VERYLOW
+define EXT_WDOG_INTERVAL_MS 50
+
 define CAN_APP_NODE_NAME "superwake-L496-bl"
